@@ -1,94 +1,226 @@
-# 🤖 AI App Generator (Track A - End-to-End Platform)
+# 🤖 AI App Generator
 
-A powerful, metadata-driven application runtime that transforms JSON configurations into production-ready full-stack applications. This project satisfies all core requirements and includes advanced features like Authentication, Multi-language support, and PWA capabilities.
+> A powerful, metadata-driven full-stack application platform that transforms JSON configurations into production-ready applications — with built-in authentication, OTP email verification, database management, CSV operations, multi-language support, and PWA capabilities.
+
+🌐 **Live Demo:** [https://ai-app-generator-sand.vercel.app](https://ai-app-generator-sand.vercel.app)
 
 ---
 
-## 🌟 Key Features
+## 📖 Introduction
 
-### 1. **Metadata-Driven UI & Engine**
-- **Dynamic Rendering**: Automatically generates premium UIs (Tables, Forms, Dashboards) from JSON.
-- **Virtual DB Schema**: Flexible data storage in PostgreSQL without migration bottlenecks.
-- **Backend Runtime**: Automated API and CRUD handling based on app metadata.
+AI App Generator is a **metadata-driven application runtime** built on Next.js 16. Instead of manually coding every CRUD screen, you define your app's structure in a JSON config — and the platform automatically renders forms, tables, dashboards, and API routes at runtime.
 
-### 2. **Advanced Functionality**
-- **🔐 Multi-Auth**: Integrated NextAuth.js for secure user management.
-- **🌍 i18n (Multi-language)**: Instant translation switching (Demo: EN/ES).
-- **🔔 Notification Hub**: Real-time alert center for system and workflow messages.
-- **⚡ Workflow Automation**: Trigger logic (`ON_CREATE`, etc.) for business automation.
-- **📊 CSV Operations**: Seamless data import/export with automatic mapping.
-- **📁 Project Export**: Download your entire app metadata as a deployable ZIP.
-- **📲 Mobile/PWA**: Responsive design with Progressive Web App support.
+The project was built as part of a **Track A — End-to-End Platform** challenge, covering:
+- Secure user authentication with OTP email verification
+- Dynamic UI generation from JSON metadata
+- Virtual database schema using PostgreSQL (no migrations needed per feature)
+- Workflow automation, notifications, CSV import/export, and project export as ZIP
 
 ---
 
 ## 🛠 Tech Stack
-- **Frontend**: Next.js 15, React 19, Tailwind CSS 4, Framer Motion.
-- **Backend**: Node.js, NextAuth.js, Server Actions.
-- **Database**: PostgreSQL (Neon.tech), Prisma ORM.
-- **Tools**: Zod, PapaParse, JSZip, bcryptjs.
+
+| Layer | Technology |
+|-------|------------|
+| **Framework** | Next.js 16.2 (App Router) |
+| **Language** | TypeScript 5 |
+| **Frontend** | React 19, Tailwind CSS 4, Framer Motion |
+| **Authentication** | NextAuth.js v4 + Prisma Adapter |
+| **OTP / Email** | Nodemailer (Gmail SMTP) |
+| **Database** | PostgreSQL via Neon.tech |
+| **ORM** | Prisma 5 |
+| **Forms & Validation** | React Hook Form + Zod |
+| **CSV Handling** | PapaParse |
+| **ZIP Export** | JSZip |
+| **Password Hashing** | bcryptjs |
+| **Deployment** | Vercel |
 
 ---
 
-## 🚀 Step-by-Step Installation Guide
+## 🏗 Project Structure
 
-### Step 1: Clone & Install Dependencies
-Open your terminal in the project root and run:
-```powershell
+```
+AI-App-Generator/
+├── prisma/
+│   └── schema.prisma          # DB models: User, Application, DynamicData, Notification, OtpCode
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── auth/           # NextAuth + send-otp + verify-otp + register routes
+│   │   │   ├── apps/           # CRUD API for Application metadata
+│   │   │   ├── data/           # Dynamic data runtime API
+│   │   │   ├── export/         # ZIP project export
+│   │   │   └── notifications/  # Notification hub API
+│   │   ├── dashboard/          # Main app dashboard
+│   │   ├── login/              # Login page
+│   │   └── layout.tsx          # Root layout
+│   ├── components/             # Reusable UI components
+│   ├── lib/
+│   │   ├── db.ts               # Prisma client
+│   │   └── email.ts            # Nodemailer SMTP config
+│   └── middleware.ts           # Route protection middleware
+├── .env.example                # Environment variable template
+├── next.config.ts
+├── tailwind.config.*
+└── package.json
+```
+
+---
+
+## ⚙️ Methodology
+
+The platform follows a **Single-Source-of-Truth** architecture:
+
+1. **Metadata Definition** — An `AppConfig` JSON object defines fields, types, labels, validations, and translations.
+2. **Dynamic Rendering** — The `Renderer` component reads the config and generates the correct UI (Table / Form / Dashboard) automatically.
+3. **Runtime API** — API routes handle all CRUD operations dynamically based on the app's metadata — no per-model endpoints needed.
+4. **Virtual Schema** — All app data is stored in a single `DynamicData` table as JSON, keyed by `appId` and `modelName`, eliminating the need for per-feature DB migrations.
+5. **OTP Auth Flow** — On signup/login, the user enters credentials → server validates → generates a 6-digit OTP → sends via Gmail SMTP → user verifies OTP → session is created via NextAuth.
+
+### Authentication Flow
+```
+User fills form → POST /api/auth/register (or send-otp)
+  → Prisma creates user (bcrypt hashed password)
+  → OTP generated & stored in OtpCode table
+  → Email sent via Nodemailer (Gmail SMTP)
+  → User enters OTP → POST /api/auth/verify-otp
+  → Session created via NextAuth
+```
+
+---
+
+## ✨ Key Features
+
+- 🔐 **Secure Auth** — Email + Password + OTP 2-step verification via Gmail
+- 🧠 **Metadata-Driven UI** — Auto-generates Tables, Forms, Dashboards from JSON config
+- 🗄️ **Virtual DB Schema** — Flexible PostgreSQL storage without per-feature migrations
+- ⚡ **Workflow Automation** — `ON_CREATE` triggers for business logic automation
+- 🔔 **Notification Hub** — Real-time alert center for system and workflow events
+- 🌍 **i18n / Multi-language** — Instant EN/ES translation switching
+- 📊 **CSV Import/Export** — Bulk data operations with automatic field mapping
+- 📁 **Project Export** — Download full app metadata as a deployable ZIP
+- 📲 **PWA Ready** — Responsive design with Progressive Web App support
+
+---
+
+## 🚀 How to Run Locally
+
+### Prerequisites
+- Node.js 18+
+- A PostgreSQL database (free tier: [neon.tech](https://neon.tech))
+- A Gmail account with [App Password](https://myaccount.google.com/apppasswords) enabled
+
+### Step 1 — Clone the Repository
+```bash
+git clone https://github.com/Dhanya-sri-K/AI-App-Generator.git
+cd AI-App-Generator
+```
+
+### Step 2 — Install Dependencies
+```bash
 npm install
 ```
 
-### Step 2: Configure Environment Variables
-Create a file named `.env` in the root directory and add your PostgreSQL connection string:
+### Step 3 — Configure Environment Variables
+Create a `.env` file in the root directory:
 ```env
+# Database (PostgreSQL - get free DB at neon.tech)
 DATABASE_URL="postgresql://user:password@host/neondb?sslmode=require"
-NEXTAUTH_SECRET="your-random-secret-key"
+
+# NextAuth
+NEXTAUTH_SECRET="your-random-32-char-secret"
 NEXTAUTH_URL="http://localhost:3000"
+
+# Gmail SMTP (for OTP emails)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-gmail-app-password"
 ```
 
-### Step 3: Setup the Database
-Synchronize the schema with your database (this will create all required tables including Auth and Notifications):
-```powershell
+> **Gmail App Password:** Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), enable 2FA, then generate an App Password for "Mail".
+
+### Step 4 — Set Up the Database
+```bash
+# Push schema to your PostgreSQL database
 npx prisma db push
-```
 
-### Step 4: Generate Prisma Client
-Ensure your client is up to date with the latest models:
-```powershell
+# Generate Prisma client
 npx prisma generate
 ```
-> **Note**: If you get a "Permission Denied" error on Windows, stop the dev server and try again.
 
-### Step 5: Launch the Application
-Start the development server:
-```powershell
+### Step 5 — Run the Development Server
+```bash
 npm run dev
 ```
-Visit [http://localhost:3000](http://localhost:3000) to experience the dynamic platform.
 
-### Step 6: Deploy to a public URL
-See **[DEPLOY.md](./DEPLOY.md)** for hosting on Vercel (free `https://your-app.vercel.app` link).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
-
-## 📖 How to Use the Platform
-
-### 1. **Switching Languages**
-Locate the language dropdown in the sidebar to switch between **English** and **Spanish**. Watch the entire UI translate instantly!
-
-### 2. **Managing Data**
-Use the **Dashboard** or **Table** view to create records. Try clicking **"Import CSV"** to bulk-upload data using the sample files provided.
-
-### 3. **Observing Workflows**
-When you create a record, check the **Workflows** page. The system is configured to trigger automatic logging for new contacts.
-
-### 4. **Authentication**
-Use the **Login/Logout** buttons in the sidebar header to test the secure access flow.
-
-### 5. **Export**
-Click **"Export Project"** in the sidebar to get a full backup of your JSON metadata and README in a ZIP file.
+### Step 6 — Build for Production
+```bash
+npm run build
+npm start
+```
 
 ---
 
-## 📐 Architecture
-The platform operates on a **Single-Source-of-Truth** principle. The `AppConfig` metadata defines everything from field types to language translations. The `Renderer` component selects the appropriate layout strategy, while the `Runtime` ensures all data operations follow the metadata rules.
+## ☁️ Deploying to Vercel
+
+1. Push your code to GitHub
+2. Go to [vercel.com/new](https://vercel.com/new) and import this repository
+3. Vercel auto-detects **Next.js** — no build config changes needed
+4. Add the following **Environment Variables** in Vercel project settings:
+
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | Your Neon PostgreSQL connection string |
+| `NEXTAUTH_SECRET` | A random 32+ character secret |
+| `NEXTAUTH_URL` | `https://your-app.vercel.app` |
+| `SMTP_HOST` | `smtp.gmail.com` |
+| `SMTP_PORT` | `587` |
+| `SMTP_USER` | Your Gmail address |
+| `SMTP_PASS` | Your Gmail App Password |
+
+5. Click **Deploy** ✅
+
+🌐 **Live URL:** [https://ai-app-generator-sand.vercel.app](https://ai-app-generator-sand.vercel.app)
+
+---
+
+## 🗄️ Database Schema
+
+| Model | Purpose |
+|-------|---------|
+| `User` | Stores registered users with hashed passwords |
+| `Account` | NextAuth OAuth accounts linked to users |
+| `Session` | Active user sessions |
+| `OtpCode` | Time-limited OTP codes for email verification |
+| `Application` | App metadata (JSON config) |
+| `DynamicData` | All app data stored as JSON (virtual schema) |
+| `Notification` | System and workflow notifications |
+
+---
+
+## 📜 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production (runs `prisma generate` first) |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npx prisma db push` | Sync schema to database |
+| `npx prisma studio` | Open Prisma database GUI |
+
+---
+
+## 👩‍💻 Author
+
+**Dhanya Sri K**
+- GitHub: [@Dhanya-sri-K](https://github.com/Dhanya-sri-K)
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
